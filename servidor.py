@@ -1,32 +1,41 @@
-
-#Se importa el módulo
 import socket
+import sys
 
-#instanciamos un objeto para trabajar con el socket
-ser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Creando el socket TCP/IP
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#Puerto y servidor que debe escuchar
-ser.bind(("", 8050))
+# Enlace de socket y puerto
+server_address = ('localhost', 10000)
 
-#Aceptamos conexiones entrantes con el metodo listen. Por parámetro las conexiones simutáneas.
-ser.listen(1)
+print >>sys.stderr, 'empezando a levantar %s puerto %s' % server_address
 
-#Instanciamos un objeto cli (socket cliente) para recibir datos
-cli, addr = ser.accept()
+#método bind para asociar un socket con un servidor
+sock.bind(server_address)
+
+# poner socket a modo de servidor
+sock.listen(1)
 
 while True:
+    # Esperando conexion
+    print >>sys.stderr, 'Esperando para conectarse'
 
-    #Recibimos el mensaje, con el metodo recv recibimos datos. Por parametro la cantidad de bytes para recibir
-    recibido = cli.recv(1024)
+    #accept, acepta una conexión
+    connection, client_address = sock.accept()
 
-    #Si se reciben datos nos muestra la IP y el mensaje recibido
-    print ("Recibo conexion de la IP: " + str(addr[0]) + " Puerto: " + str(addr[1]))
+    try:
+        print >>sys.stderr, 'concexion desde', client_address
 
-    #Devolvemos el mensaje al cliente
-    cli.send('mensaje recibido')
+        # Recibe los datos en trozos y reetransmite
+        while True:
+            data = connection.recv(19)
+            print >>sys.stderr, 'recibido "%s"' % data
+            if data:
+                print >>sys.stderr, 'enviando mensaje de vuelta al cliente'
+                connection.sendall(data)
+            else:
+                print >>sys.stderr, 'no hay mas datos', client_address
+                break
 
-#Cerramos la instancia del socket cliente y servidor
-cli.close()
-ser.close()
-
-print("Conexiones cerradas")
+    finally:
+        # Cerrando conexion
+        connection.close()
