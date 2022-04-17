@@ -44,26 +44,43 @@ def service_conn(key, mask):
 
             #la info adicional que estábamso almacenando, se llega a enviar al cliente con esta función
             data.outb = data.outb[sent:]
+
+
+
+
+
 if __name__ == '__main__':
-host = socket.gethostname() # Esta función nos da el nombre de la máquina
-port = 12345
-BUFFER_SIZE = 1024 # Usamos un número pequeño para tener una respuesta rápida
-# Creamos un socket TCP
-socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# Configuramos el socket en modo de no-bloqueo
-socket_tcp.setblocking(False)
-socket_tcp.bind((host, port))
-socket_tcp.listen()
-print('Socket abierto en {} {}'.format(host, port))
-socket_tcp.setblocking(False)
-# Registramos el socket para que sea monitoreado por las funciones selector,.select()
-selector.register(socket_tcp, selectors.EVENT_READ, data=None)
-while socket_tcp:
-events = selector.select(timeout=None)
-for key, mask in events:
-if key.data is None:
-accept_conn(key.fileobj)
-else:
-service_conn(key, mask)
-socket_tcp.close()
-print('Conexión terminada.')
+    host = socket.gethostname() # Esta función nos da el nombre de la máquina
+    port = 12345
+    BUFFER_SIZE = 1024 # Usamos un número pequeño para tener una respuesta rápida
+
+    # Creamos un socket TCP
+    socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Configuramos el socket en modo de no-bloqueo
+    socket_tcp.setblocking(False)
+    socket_tcp.bind((host, port))
+    socket_tcp.listen()
+    print('Socket abierto en {} {}'.format(host, port))
+
+    #con esta diferencia, el servidor no se podrá bloquear
+    socket_tcp.setblocking(False)
+
+    #con el data de esta función, se almacenará toda la información con el socket
+    selector.register(socket_tcp, selectors.EVENT_READ, data=None)
+
+    while socket_tcp:
+        events = selector.select(timeout=None)
+        for key, mask in events:
+            #tenemos dos opciones, que la tupla sea None
+            #entonces, entonces de la función listen, se tendrá que aceptar la conexión
+            if key.data is None:
+                accept_conn(key.fileobj)
+
+            #si no es None, entonces el socket ya ha sido aceptado y se tendrá que servir al cliente
+            else:
+                service_conn(key, mask)
+
+    socket_tcp.close()
+
+    print('Conexión terminada.')
