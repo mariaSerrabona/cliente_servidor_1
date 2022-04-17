@@ -27,10 +27,18 @@ def accept_wrapper(sock):
 def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
+
+    #si el socket está listo para leer, entonces la sentencia del if será True
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(1024)  # Should be ready to read
         if recv_data:
+
+            #la info adicional, se almacena aquí para que pueda ser mandada después
             data.outb += recv_data
+
+
+        #en el caso de que no se reciva ningún tipo de información, entonces
+        #quiere decir que el cliente ha cerrado su socket, por lo tanto el socket del server también tendrá que cerrarse
         else:
             print(f"Closing connection to {data.addr}")
             sel.unregister(sock)
