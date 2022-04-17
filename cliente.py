@@ -59,7 +59,6 @@ def service_connection(key, mask):
 
     #cuando se está en el modo de escritura
     if mask & selectors.EVENT_WRITE:
-        introduccion_datos(key)
 
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
