@@ -4,7 +4,7 @@ import types
 
 
 selector = selectors.DefaultSelector()
-messages = [b'hace 34 grados de maxima', b'hace 15 grados de minima']
+messages = [b'Mensaje 1 del cliente', b'Mensaje 2 del cliente']
 BUFFER_SIZE = 1024
 
 
@@ -61,12 +61,33 @@ def service_connection(key, mask):
 
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
+            introduccion_datos(host,port)
 
         if data.outb:
             #se envía la información al servidor
             print('Enviando {} a conexión {}'.format(repr(data.outb), data.connid))
             sent = sock.send(data.outb) # Debe estar listo para escritura
             data.outb = data.outb[sent:]
+
+
+def introduccion_datos(host, port):
+
+    client_socket = socket.socket()  # instantiate
+    client_socket.connect((host, port))  # connect to the server
+
+    print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
+
+    message = input(" -> ")  # take input
+
+    while message.lower().strip() != 'fin':
+        client_socket.send(message.encode())  # send message
+        data = client_socket.recv(1024).decode()  # receive response
+
+        print('Received from server: ' + data)  # show in terminal
+
+        message = input(" -> ")  # again take input
+
+    client_socket.close()  # close the connection
 
 if __name__ == '__main__':
     host = socket.gethostname() # Esta función nos da el nombre de la máquina
