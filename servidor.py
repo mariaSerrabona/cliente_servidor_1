@@ -1,31 +1,49 @@
 import selectors
 import types
 import socket
+
 selector = selectors.DefaultSelector()
 def accept_conn(sock):
-conn, addr = sock.accept()
-print('Conexión aceptada en {}'.format(addr))
-# Ponemos el socket en modo de no-bloqueo
-conn.setblocking(False)
-data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
-events = selectors.EVENT_READ | selectors.EVENT_WRITE
-selector.register(conn, events, data=data)
+    #para poner el socket en un modo de no-bloqueo
+    #si se bloqueara, el servidor se conelaría hasta obtener una respuesta del cleinte, dejando de lado otros posibles sockets que se pueden crear
+    conn, addr = sock.accept()
+    print('Conexión aceptada en {}'.format(addr))
+
+    # Ponemos el socket en modo de no-bloqueo
+    conn.setblocking(False)
+
+    #creamos un objeto para mantener la información que se le quiere pasar al cliente
+    #previamente, necesitamos saber que el servidor está listo para leer y escribir info
+    data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
+    events = selectors.EVENT_READ | selectors.EVENT_WRITE
+    selector.register(conn, events, data=data)
+
+
 def service_conn(key, mask):
-sock = key.fileobj
-data = key.data
-if mask & selectors.EVENT_READ:
-recv_data = sock.recv(BUFFER_SIZE)
-if recv_data:
-data.outb += recv_data
-else:
-print('Cerrando conexion en {}'.format(data.addr))
-selector.unregister(sock)
-sock.close()
-if mask & selectors.EVENT_WRITE:
-if data.outb:
-print('Echo desde {} a {}'.format(repr(data.outb), data.addr))
-sent = sock.send(data.outb)
-data.outb = data.outb[sent:]
+    sock = key.fileobj
+    data = key.data
+
+    #si el socket está listo para leer, entonces la sentencia del if será True
+    if mask & selectors.EVENT_READ:
+        recv_data = sock.recv(BUFFER_SIZE)
+        if recv_data:
+        #la info adicional, se almacena aquí para que pueda ser mandada después
+            data.outb += recv_data
+
+        #en el caso de que no se reciva ningún tipo de información, entonces
+        #quiere decir que el cliente ha cerrado su socket, por lo tanto el socket del server también tendrá que cerrarse
+        else:
+            print('Cerrando conexion en {}'.format(data.addr))
+            selector.unregister(sock)
+            sock.close()
+
+    if mask & selectors.EVENT_WRITE:
+        if data.outb:
+            print('Echo desde {} a {}'.format(repr(data.outb), data.addr))
+            sent = sock.send(data.outb)
+
+            #la info adicional que estábamso almacenando, se llega a enviar al cliente con esta función
+            data.outb = data.outb[sent:]
 if __name__ == '__main__':
 host = socket.gethostname() # Esta función nos da el nombre de la máquina
 port = 12345
