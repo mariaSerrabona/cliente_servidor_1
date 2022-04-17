@@ -61,7 +61,7 @@ def service_connection(key, mask):
 
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
-            introduccion_datos(host,port)
+            introduccion_datos(key)
 
         if data.outb:
             #se envía la información al servidor
@@ -70,10 +70,9 @@ def service_connection(key, mask):
             data.outb = data.outb[sent:]
 
 
-def introduccion_datos(host, port):
+def introduccion_datos(key):
 
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+    client_socket = key.fileobj
 
     print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
 
