@@ -43,10 +43,14 @@ def service_connection(key, mask):
             print(f"Closing connection to {data.addr}")
             sel.unregister(sock)
             sock.close()
+
+
     if mask & selectors.EVENT_WRITE:
         if data.outb:
             print(f"Echoing {data.outb!r} to {data.addr}")
             sent = sock.send(data.outb)  # Should be ready to write
+
+            #la info adicional que estábamso almacenando, se llega a enviar al cliente con esta función
             data.outb = data.outb[sent:]
 
 
