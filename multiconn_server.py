@@ -17,4 +17,6 @@ print(f"Listening on {(host, port)}")
 
 #con esta diferencia, el servidor no se podrá bloquear
 lsock.setblocking(False)
+
+#con el data de esta función, se almacenará toda la información con el socket
 sel.register(lsock, selectors.EVENT_READ, data=None)
