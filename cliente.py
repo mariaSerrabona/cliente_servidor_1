@@ -44,6 +44,7 @@ def service_connection(key, mask):
 
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(BUFFER_SIZE) # Debe estar listo para lectura
+        introduccion_datos(key)
 
         if recv_data:
             print('Recibido {} de conexión {}'.format(repr(recv_data), data.connid))
@@ -58,6 +59,7 @@ def service_connection(key, mask):
 
     #cuando se está en el modo de escritura
     if mask & selectors.EVENT_WRITE:
+        introduccion_datos(key)
 
         if not data.outb and data.messages:
             data.outb = data.messages.pop(0)
@@ -70,16 +72,15 @@ def service_connection(key, mask):
             data.outb = data.outb[sent:]
 
 
-def introduccion_datos():
-    host = socket.gethostname()  # as both code is running on same pc
-    port = 34566  # socket server port number
+def introduccion_datos(key):
 
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+    client_socket = key.fileobj
 
     print('Introduzca los siguientes datos: temperatura mínima, temperatura máxima, presión y pluviometría')
 
     lista_datos=[]
+
+    #hacemos los input para que se introduzcana los datos
 
     message = input(" -> ")
     temp_min=int(message)
@@ -101,13 +102,18 @@ def introduccion_datos():
     #mensaje para parar la conexión cuando se han introducido los datos
     message = input(" -> ")
 
+
+#cuando se identifica una cadena de texto de tipo 'fin' se cerrará la conexión
+#entendiendo así que se han introducido todos los datos pedidos
+#al final se mostrará por pantalla la lista de los datos introducidos
+
     while message.lower().strip() != 'fin':
         client_socket.send(message.encode())  # send message
         data = client_socket.recv(1024).decode()  # receive response
 
-        print('Received from server: ' + data)  # show in terminal
+        print('Received from server: ' + data)
 
-        message = input(" -> ")  # again take input
+        message = input(" -> ")
 
     client_socket.close()  # close the connection
 
