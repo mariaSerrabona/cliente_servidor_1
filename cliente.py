@@ -2,10 +2,9 @@ import socket
 import selectors
 import types
 
-start_connections()
 
 selector = selectors.DefaultSelector()
-messages = [b'Mensaje 1 del cliente', b'Mensaje 2 del cliente']
+messages = [b'hace 34 grados de maxima', b'hace 15 grados de minima']
 BUFFER_SIZE = 1024
 
 
