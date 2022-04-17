@@ -71,6 +71,8 @@ def service_connection(key, mask):
             data.outb = data.outb[sent:]
 
 
+
+#creamos una función que nos permita introducir datos y almacenarlos en una lista
 def introduccion_datos(key):
 
     client_socket = key.fileobj
@@ -82,23 +84,24 @@ def introduccion_datos(key):
     #hacemos los input para que se introduzcana los datos
 
     message = input(" -> ")
-    temp_min=int(message)
+    temp_min=float(message)
     lista_datos.append(temp_min)
 
     message = input(" -> ")
-    temp_max=int(message)
+    temp_max=float(message)
     lista_datos.append(temp_max)
 
     message = input(" -> ")
-    presion=int(message)
+    presion=float(message)
     lista_datos.append(presion)
 
 
     message = input(" -> ")
-    pluvi=int(message)
+    pluvi=float(message)
     lista_datos.append(pluvi)
 
     #mensaje para parar la conexión cuando se han introducido los datos
+    #este mensaje siempre tendrá que ser la palabra 'fin'
     message = input(" -> ")
 
 
