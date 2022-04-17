@@ -10,9 +10,13 @@ import types
 def accept_wrapper(sock):
 
     #para poner el socket en un modo de no-bloqueo
+    #si se bloqueara, el servidor se conelaría hasta obtener una respuesta del cleinte, dejando de lado otros posibles sockets que se pueden crear
     conn, addr = sock.accept()
     print(f"Accepted connection from {addr}")
     conn.setblocking(False)
+
+    #creamos un objeto para mantener la información que se le quiere pasar al cliente
+    #previamente, necesitamos saber que el servidor está listo para leer y escribir info
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     sel.register(conn, events, data=data)
